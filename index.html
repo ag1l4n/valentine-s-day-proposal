@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Project: Valentine Protocol</title>
+    <style>
+        /* --- CSS: Base Styles (Mobile First) --- */
+        :root {
+            --primary: #ff4d6d;
+            --bg-start: #ffdde1;
+            --bg-end: #ee9ca7;
+            --glass: rgba(255, 255, 255, 0.85);
+            --text: #333;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, var(--bg-start), var(--bg-end));
+            color: var(--text);
+            font-family: 'Courier New', Courier, monospace, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh; /* Use vh for laptop compatibility */
+            min-height: 100dvh; /* Use dvh for mobile browsers */
+            overflow: hidden;
+            text-align: center;
+            position: relative;
+            transition: background 0.5s ease;
+        }
+
+        /* Floating Hearts Background */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 3.22l-.61-.6a5.5 5.5 0 0 0-7.78 7.77L10 18.78l8.39-8.4a5.5 5.5 0 0 0-7.78-7.77l-.61.61z' fill='%23ff4d6d' opacity='0.2'/%3E%3C/svg%3E");
+            animation: floatHearts 60s linear infinite;
+            z-index: -1;
+            transition: opacity 1s ease;
+        }
+
+        @keyframes floatHearts {
+            from { background-position: 0 0; }
+            to { background-position: 0 -1000px; }
+        }
+
+        body.has-bg::before { opacity: 0; }
+
+        .container {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            padding: 2rem 1.5rem;
+            border-radius: 20px;
+            border: 2px solid #fff;
+            width: 85%;
+            max-width: 420px; /* Standard mobile card width */
+            box-shadow: 0 10px 30px rgba(255, 77, 109, 0.2);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Smooth shrinking animation */
+            position: relative;
+            z-index: 10;
+        }
+
+        /* --- NEW: Shrunk State for Success Screen --- */
+        .container.shrunk {
+            max-width: 260px !important; /* Force it smaller to fit in heart */
+            width: 70% !important;
+            padding: 1rem !important;
+            background: rgba(255, 255, 255, 0.9); /* More opaque to pop against photo */
+        }
+        
+        .container.shrunk h1 { font-size: 1.2em !important; margin-bottom: 5px; }
+        .container.shrunk p { font-size: 0.8em !important; margin-top: 5px; margin-bottom: 0; }
+        .container.shrunk img { margin-top: 5px; }
+
+        /* --- LAPTOP OPTIMIZATION (Media Query) --- */
+        @media (min-width: 768px) {
+            .container {
+                max-width: 500px;
+                padding: 3rem;
+            }
+            .container.shrunk {
+                max-width: 320px !important; /* Slightly larger on laptop */
+            }
+            
+            /* Font scaling for laptop */
+            h1 { font-size: 2rem !important; }
+            p { font-size: 1.1rem !important; }
+            input { font-size: 1.2rem !important; padding: 15px !important; }
+            .action-btn { font-size: 1.1rem !important; padding: 15px 40px !important; }
+            .action-btn:hover { transform: scale(1.05); background: #ff3355; }
+        }
+
+        h1 { margin-bottom: 10px; color: var(--primary); font-size: 1.5rem; }
+        p { margin-bottom: 20px; line-height: 1.4; font-weight: bold; color: #555; font-size: 0.95rem; }
+
+        input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            border: 2px solid var(--primary);
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--text);
+            text-align: center;
+            font-family: inherit;
+            font-size: 16px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        input:focus { border-color: #ff8fab; box-shadow: 0 0 10px rgba(255, 77, 109, 0.3);}
+
+        .action-btn {
+            padding: 12px 30px;
+            border-radius: 30px;
+            border: none;
+            background: var(--primary);
+            color: white;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+            font-family: inherit;
+            box-shadow: 0 5px 15px rgba(255, 77, 109, 0.3);
+            -webkit-tap-highlight-color: transparent;
+        }
+        .action-btn:active { transform: scale(0.95); }
+
+        .proposal-btns-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            min-height: 120px;
+            position: relative;
+        }
+
+        @media (min-width: 400px) {
+            .proposal-btns-container { flex-direction: row; }
+        }
+
+        #yesBtn { background-color: #2ecc71; font-size: 1.2rem; padding: 15px 30px; transition: all 0.3s; z-index: 100; }
+        #noBtn { background-color: #e74c3c; font-size: 1.2rem; padding: 15px 30px; transition: all 0.2s ease; z-index: 90; }
+
+        .hidden { display: none !important; }
+        
+        .chem-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        .element {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid var(--primary);
+            width: 45px;
+            height: 45px;
+            margin: 5px;
+            background: rgba(255,255,255,0.6);
+            border-radius: 8px;
+            color: var(--primary);
+            font-weight: bold;
+        }
+        .element span { font-size: 0.6em; color: var(--text); font-weight: normal; }
+        .plus-sign { font-size: 1.5em; margin: 0 5px; color: var(--primary); }
+
+        .progress-bar {
+            width: 100%; height: 6px; background: rgba(255,255,255,0.5);
+            margin-bottom: 20px; border-radius: 10px; overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%; background: linear-gradient(90deg, var(--primary), #ff8fab);
+            width: 5%; transition: width 0.5s ease;
+        }
+
+        .shake { animation: shake 0.4s; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+
+        .otter-gif {
+            width: 100%;
+            height: auto;
+            border-radius: 15px;
+            border: 3px solid var(--primary);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="mainCard">
+        <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+
+        <div id="level1">
+            <h1>🔒 Security Check</h1>
+            <p>Protocol 1: Enter the date we first met/started dating.</p>
+            <input type="tel" id="input1" placeholder="DDMMYYYY" autocomplete="off">
+            <br>
+            <button class="action-btn" onclick="checkInput(1)">AUTHENTICATE</button>
+        </div>
+
+        <div id="level2" class="hidden">
+            <h1>🧐 Verification</h1>
+            <p>Protocol 2: What is our absolute favorite food?</p>
+            <input type="text" id="input2" placeholder="Answer..." autocomplete="off">
+            <br>
+            <button class="action-btn" onclick="checkInput(2)">SUBMIT</button>
+        </div>
+
+        <div id="level3" class="hidden">
+            <h1>😘 Affection</h1>
+            <p>Protocol 3: How many kisses do you want?</p>
+            <input type="text" id="input3" placeholder="Hint: Not a number" autocomplete="off">
+            <br>
+            <button class="action-btn" onclick="checkInput(3)">SUBMIT</button>
+        </div>
+
+        <div id="level4" class="hidden">
+            <h1>🐶 Future Plans</h1>
+            <p>Protocol 4: If we have pets, what are their names?</p>
+            <input type="text" id="input4" placeholder="Name 1 and Name 2" autocomplete="off">
+            <br>
+            <button class="action-btn" onclick="checkInput(4)">SUBMIT</button>
+        </div>
+
+        <div id="level5" class="hidden">
+            <h1>🧪 Analysis</h1>
+            <p>Final Protocol: Analyze the composition of "Us".</p>
+            <div class="chem-container">
+                <div class="element">29<span>Cu</span></div> 
+                <div class="plus-sign">+</div>
+                <div class="element">52<span>Te</span></div> 
+                <div class="plus-sign">=</div>
+                <span style="font-size: 1.5em; font-weight: bold; color: var(--primary);">?</span>
+            </div>
+            <p style="font-size: 0.85em; opacity: 0.8;">(Hint: Copper + Tellurium makes you...)</p>
+            <input type="text" id="input5" placeholder="Resulting word" autocomplete="off">
+            <br>
+            <button class="action-btn" onclick="checkInput(5)">SYNTHESIZE</button>
+        </div>
+
+        <div id="proposalLevel" class="hidden">
+            <h1>❤️ Analysis Complete</h1>
+            <p style="font-size: 1.2em; margin-bottom: 30px;">Will you be my Valentine?</p>
+            
+            <div class="proposal-btns-container">
+                <button class="action-btn" id="yesBtn" onclick="sheSaidYes()">YES!</button>
+                <button class="action-btn" id="noBtn" onmouseover="moveButton()" ontouchstart="moveButton(event)">No</button>
+            </div>
+        </div>
+
+        <div id="successScreen" class="hidden">
+            <h1 style="font-size: 1.6em;">YAY! Happy Valentine's Day Bojieeee!</h1>
+            <img src="us.gif" alt="Us" class="otter-gif">
+            <p style="margin-top: 15px;">Sending you a manymanyyyy virtual kisses! ❤️</p>
+        </div>
+    </div>
+
+    <script>
+        // ================= CONFIGURATION =================
+        const ANSWERS = {
+            1: "13012023",          // Level 1: Date
+            2: "mutton briyani",   // Level 2: Food
+            3: "manymany",          // Level 3: Kisses
+            4: "kopi and milo",     // Level 4: Pets
+            5: "cute"               // Level 5: Chemistry
+        };
+        // =================================================
+
+        let currentLevel = 1;
+        let yesScale = 1;
+        let noScale = 1;
+
+        function checkInput(levelId) {
+            const inputField = document.getElementById(`input${levelId}`);
+            const userInput = inputField.value.toLowerCase().trim().replace(/\s+/g, ' ');
+            
+            if(userInput === ANSWERS[levelId]) {
+                nextLevel(levelId);
+            } else {
+                doShake();
+                inputField.value = ''; 
+                inputField.placeholder = "Try again...";
+                inputField.focus();
+            }
+        }
+
+        function nextLevel(currentId) {
+            document.getElementById(`level${currentId}`).classList.add('hidden');
+            const nextId = currentId + 1;
+
+            if(nextId <= 5) {
+                document.getElementById(`level${nextId}`).classList.remove('hidden');
+                document.getElementById('progress').style.width = `${nextId * 18}%`;
+            } else {
+                document.getElementById('proposalLevel').classList.remove('hidden');
+                document.getElementById('progress').style.width = "95%";
+            }
+            currentLevel = nextId;
+        }
+
+        function doShake() {
+            const card = document.getElementById('mainCard');
+            card.classList.add('shake');
+            setTimeout(() => card.classList.remove('shake'), 400);
+        }
+
+        function moveButton(e) {
+            if(e) e.preventDefault(); 
+            const noBtn = document.getElementById('noBtn');
+            const yesBtn = document.getElementById('yesBtn');
+            yesScale += 0.4;
+            noScale -= 0.15;
+            yesBtn.style.transform = `scale(${yesScale})`;
+            noBtn.style.transform = `scale(${noScale})`;
+            if (noScale < 0.3) {
+                noBtn.style.opacity = '0';
+                noBtn.style.pointerEvents = 'none';
+                return;
+            }
+            const maxX = window.innerWidth - noBtn.offsetWidth - 50;
+            const maxY = window.innerHeight - noBtn.offsetHeight - 50;
+            const randomX = Math.random() * maxX;
+            const randomY = Math.random() * maxY;
+            noBtn.style.position = 'fixed'; 
+            noBtn.style.left = randomX + 'px';
+            noBtn.style.top = randomY + 'px';
+        }
+
+        function sheSaidYes() {
+            document.getElementById('proposalLevel').classList.add('hidden');
+            document.getElementById('successScreen').classList.remove('hidden');
+            document.getElementById('progress').style.width = "100%";
+            
+            // --- Shrink Container ---
+            document.getElementById('mainCard').classList.add('shrunk');
+
+            // --- Background Update ---
+            document.body.classList.add('has-bg');
+            document.body.style.backgroundImage = "url('bg.jpg')";
+            
+            // This ensures the WHOLE background is visible (no cutting)
+            document.body.style.backgroundSize = "contain"; 
+            document.body.style.backgroundPosition = "center center";
+            document.body.style.backgroundRepeat = "no-repeat";
+            
+            // Match the background color to the dark blue in your photo
+            document.body.style.backgroundColor = "#0a0a23"; 
+        }
+    </script>
+</body>
+</html>
